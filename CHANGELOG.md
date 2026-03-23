@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.1.0] - 2026-03-23
+
+Improved card interaction and styling consistency with Home Assistant, plus release workflow refinements.
+
+### Added
+- Click-to-open `more-info` behavior for each zone value when an entity is configured
+- Click-to-open `more-info` behavior for the central score (`score`) and last brush time (`last_brush_time`)
+
+### Changed
+- Zone value labels now render in an HTML overlay, so text size remains fixed when the SVG scales
+- Zone value typography now follows Home Assistant theme variables (`--primary-font-family`, `--ha-font-weight-normal`)
+
 ## [v1.0.0] - 2026-03-22
 
 First release of Toothbrush State Card. A custom Home Assistant (Lovelace) card displaying an SVG dental map divided into 8 zones.
