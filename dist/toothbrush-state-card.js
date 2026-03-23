@@ -156,6 +156,27 @@ class ToothbrushStateCard extends HTMLElement {
     return `rgb(${Math.round(red)}, ${Math.round(green)}, ${Math.round(blue)})`;
   }
 
+  _openMoreInfo(entityId) {
+    if (!entityId) {
+      return;
+    }
+    fireEvent(this, "hass-more-info", { entityId });
+  }
+
+  _bindEntityActions() {
+    if (!this.shadowRoot) {
+      return;
+    }
+
+    this.shadowRoot.querySelectorAll("[data-entity]").forEach((element) => {
+      const entityId = element.getAttribute("data-entity");
+      if (!entityId) {
+        return;
+      }
+      element.addEventListener("click", () => this._openMoreInfo(entityId));
+    });
+  }
+
   _render() {
     if (!this.shadowRoot || !this._config) {
       return;
@@ -181,11 +202,6 @@ class ToothbrushStateCard extends HTMLElement {
         <g>
           <title>${t(zone.key)}${entityId ? ` (${entityId})` : ""}: ${displayValue}</title>
           <path d="${zone.d}" fill="${color}" stroke="none" />
-          ${
-            this._config.show_values
-              ? `<text x="${zone.valuePos.x}" y="${zone.valuePos.y}" text-anchor="middle" dominant-baseline="middle">${displayValue}</text>`
-              : ""
-          }
         </g>
       `;
     };
@@ -205,16 +221,24 @@ class ToothbrushStateCard extends HTMLElement {
     })();
     const scoreValue = this._getZoneValue(this._config.score);
     const scoreDisplay = scoreValue === null ? "" : `${Math.round(scoreValue)}%`;
-    const scoreSvg = scoreDisplay
-      ? `<text x="180" y="110" text-anchor="middle" dominant-baseline="middle" class="score-label">${scoreDisplay}</text>`
+    const scoreHtml = scoreDisplay
+      ? this._config.score
+        ? `<button type="button" class="score-label clickable" data-entity="${this._config.score}" aria-label="Score: ${scoreDisplay}">${scoreDisplay}</button>`
+        : `<div class="score-label">${scoreDisplay}</div>`
       : "";
 
-    const labelsSvg = this._zones.map((zone) => {
+    const labelsHtml = this._zones.map((zone) => {
       if (!this._config.show_values) return "";
       const entityId = this._getEntityIdForZone(zone.key);
       const value = this._getZoneValue(entityId);
       const displayValue = value === null ? "-" : `${Math.round(value)}`;
-      return `<text x="${zone.valuePos.x}" y="${zone.valuePos.y}" text-anchor="middle" dominant-baseline="middle">${displayValue}</text>`;
+      const left = ((zone.valuePos.x - 65) / 225) * 100;
+      const top = ((zone.valuePos.y - 22) / 182) * 100;
+      const style = `left:${left}%;top:${top}%`;
+      if (!entityId) {
+        return `<div class="zone-value" style="${style}">${displayValue}</div>`;
+      }
+      return `<button type="button" class="zone-value clickable" data-entity="${entityId}" style="${style}" aria-label="${t(zone.key)}: ${displayValue}">${displayValue}</button>`;
     }).join("");
 
     this.shadowRoot.innerHTML = `
@@ -238,25 +262,73 @@ class ToothbrushStateCard extends HTMLElement {
           display: block;
         }
 
-        text {
-          font-size: 11px;
-          font-weight: 600;
-          fill: var(--primary-text-color);
+        .svg-wrap {
+          position: relative;
+        }
+
+        .zone-values {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+
+        .zone-value {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          font-family: var(--primary-font-family);
+          font-size: 1rem;
+          font-weight: var(--ha-font-weight-normal, 400);
+          color: var(--primary-text-color);
+          line-height: 1;
+          white-space: nowrap;
+          border: none;
+          background: transparent;
+          padding: 0;
+          margin: 0;
+        }
+
+        .zone-value.clickable {
+          cursor: pointer;
+          pointer-events: auto;
+        }
+
+        .score-overlay {
+          position: absolute;
+          left: 51.11%;
+          top: 48.35%;
+          transform: translate(-50%, -50%);
           pointer-events: none;
         }
 
         .score-label {
+          font-family: var(--primary-font-family);
           font-size: 22px;
           font-weight: 700;
-          fill: var(--primary-text-color);
+          color: var(--primary-text-color);
+          line-height: 1;
+          border: none;
+          background: transparent;
+          padding: 0;
+          margin: 0;
+          pointer-events: auto;
+        }
+
+        .score-label.clickable,
+        .last-brush-time.clickable {
+          cursor: pointer;
         }
 
         .last-brush-time {
+          display: block;
+          width: 100%;
           text-align: center;
+          font-family: var(--primary-font-family);
           font-size: 1rem;
-          font-weight: 400;
+          font-weight: var(--ha-font-weight-normal, 400);
           color: var(--primary-text-color);
           padding: 4px 0 8px;
+          border: none;
+          background: transparent;
         }
 
         @media (max-width: 420px) {
@@ -269,10 +341,6 @@ class ToothbrushStateCard extends HTMLElement {
             margin-bottom: 6px;
           }
 
-          text {
-            font-size: 9px;
-          }
-
           .score-label {
             font-size: 16px;
           }
@@ -282,29 +350,37 @@ class ToothbrushStateCard extends HTMLElement {
       <ha-card>
         ${title ? `<div class="title">${title}</div>` : ""}
 
-        <svg viewBox="65 22 225 182" role="img" aria-label="${t('aria_label')}">
-          <defs>
-            <filter id="zone-blur" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="2" />
-            </filter>
-            <clipPath id="upper-clip">
-              <path d="M80,96 Q80,38 180,38 Q280,38 280,96 L240,96 Q240,62 180,62 Q120,62 120,96 Z" />
-            </clipPath>
-            <clipPath id="lower-clip">
-              <path d="M80,124 Q80,182 180,182 Q280,182 280,124 L240,124 Q240,158 180,158 Q120,158 120,124 Z" />
-            </clipPath>
-          </defs>
-          <g filter="url(#zone-blur)" clip-path="url(#upper-clip)">${upperZonesSvg}</g>
-          <g filter="url(#zone-blur)" clip-path="url(#lower-clip)">${lowerZonesSvg}</g>
-          ${labelsSvg}
-          ${scoreSvg}
-          <path d="M80,96 Q80,38 180,38 Q280,38 280,96 L240,96 Q240,62 180,62 Q120,62 120,96 Z" fill="none" stroke="var(--divider-color, #666)" stroke-width="2" stroke-linejoin="round" />
-          <path d="M80,124 Q80,182 180,182 Q280,182 280,124 L240,124 Q240,158 180,158 Q120,158 120,124 Z" fill="none" stroke="var(--divider-color, #666)" stroke-width="2" stroke-linejoin="round" />
-        </svg>
+        <div class="svg-wrap">
+          <svg viewBox="65 22 225 182" role="img" aria-label="${t('aria_label')}">
+            <defs>
+              <filter id="zone-blur" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2" />
+              </filter>
+              <clipPath id="upper-clip">
+                <path d="M80,96 Q80,38 180,38 Q280,38 280,96 L240,96 Q240,62 180,62 Q120,62 120,96 Z" />
+              </clipPath>
+              <clipPath id="lower-clip">
+                <path d="M80,124 Q80,182 180,182 Q280,182 280,124 L240,124 Q240,158 180,158 Q120,158 120,124 Z" />
+              </clipPath>
+            </defs>
+            <g filter="url(#zone-blur)" clip-path="url(#upper-clip)">${upperZonesSvg}</g>
+            <g filter="url(#zone-blur)" clip-path="url(#lower-clip)">${lowerZonesSvg}</g>
+            <path d="M80,96 Q80,38 180,38 Q280,38 280,96 L240,96 Q240,62 180,62 Q120,62 120,96 Z" fill="none" stroke="var(--divider-color, #666)" stroke-width="2" stroke-linejoin="round" />
+            <path d="M80,124 Q80,182 180,182 Q280,182 280,124 L240,124 Q240,158 180,158 Q120,158 120,124 Z" fill="none" stroke="var(--divider-color, #666)" stroke-width="2" stroke-linejoin="round" />
+          </svg>
+          <div class="zone-values">${labelsHtml}</div>
+          <div class="score-overlay">${scoreHtml}</div>
+        </div>
 
-        ${lastBrushTimeFormatted !== null ? `<div class="last-brush-time">${lastBrushTimeFormatted}</div>` : ""}
+        ${lastBrushTimeFormatted !== null
+          ? this._config.last_brush_time
+            ? `<button type="button" class="last-brush-time clickable" data-entity="${this._config.last_brush_time}" aria-label="Last brush time: ${lastBrushTimeFormatted}">${lastBrushTimeFormatted}</button>`
+            : `<div class="last-brush-time">${lastBrushTimeFormatted}</div>`
+          : ""}
       </ha-card>
     `;
+
+    this._bindEntityActions();
   }
 }
 
