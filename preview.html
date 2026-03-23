@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Toothbrush State Card Preview</title>
+    <style>
+      :root {
+        --primary-text-color: #1f2937;
+        --secondary-text-color: #6b7280;
+        --divider-color: #9ca3af;
+        --ha-card-header-font-size: 24px;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: #f3f4f6;
+        color: #1f2937;
+      }
+
+      /* ── Top bar ─────────────────────────────────────────── */
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0 24px;
+        height: 52px;
+      }
+
+      .tabs {
+        display: flex;
+        height: 100%;
+      }
+
+      .tab {
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #6b7280;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        transition: color .15s, border-color .15s;
+        user-select: none;
+      }
+
+      .tab:hover { color: #374151; }
+      .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+      .lang-selector {
+        margin-left: auto;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        font-size: 13px;
+      }
+
+      .lang-selector span { color: #6b7280; }
+
+      .lang-btn {
+        border: 1px solid #d1d5db;
+        background: white;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 13px;
+        cursor: pointer;
+        color: #374151;
+        transition: background .15s;
+      }
+      .lang-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+      /* ── Tab panels ──────────────────────────────────────── */
+      .panel { display: none; padding: 24px; }
+      .panel.active { display: block; }
+
+      /* ── Card tab ────────────────────────────────────────── */
+      .controls {
+        max-width: 880px;
+        margin: 0 auto 16px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .controls button {
+        border: 1px solid #d1d5db;
+        background: white;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 13px;
+        cursor: pointer;
+        color: #374151;
+      }
+
+      .previews {
+        max-width: 880px;
+        margin: 0 auto;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .frame { min-width: 0; background: transparent; }
+      .frame.large  { width: 560px; }
+      .frame.small  { width: 280px; }
+      .frame.xsmall { width: 140px; }
+
+      .frame-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 6px;
+      }
+
+      ha-card {
+        display: block;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 6px rgba(0,0,0,.08);
+      }
+
+      toothbrush-state-card {
+        display: block;
+        outline: 2px dashed #94a3b8;
+        outline-offset: 2px;
+        border-radius: 12px;
+      }
+
+      /* ── Editor tab ──────────────────────────────────────── */
+      .editor-wrap {
+        max-width: 480px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.08);
+        padding: 20px 24px;
+      }
+
+      .editor-note {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 20px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 8px 12px;
+      }
+
+      .editor-form {
+        display: grid;
+        gap: 14px;
+      }
+
+      /* Material-ish text field */
+      .mock-field {
+        position: relative;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        padding: 14px 12px 6px;
+        background: white;
+      }
+      .mock-field label {
+        position: absolute;
+        top: 5px;
+        left: 12px;
+        font-size: 11px;
+        color: #6b7280;
+        pointer-events: none;
+      }
+      .mock-field input {
+        width: 100%;
+        border: none;
+        outline: none;
+        font-size: 14px;
+        color: #1f2937;
+        background: transparent;
+        padding: 0;
+        font-family: inherit;
+      }
+
+      /* Entity picker */
+      .mock-entity {
+        position: relative;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        padding: 14px 36px 6px 12px;
+        background: white;
+      }
+      .mock-entity label {
+        position: absolute;
+        top: 5px;
+        left: 12px;
+        font-size: 11px;
+        color: #6b7280;
+        pointer-events: none;
+      }
+      .mock-entity input {
+        width: 100%;
+        border: none;
+        outline: none;
+        font-size: 14px;
+        color: #6b7280;
+        background: transparent;
+        padding: 0;
+        font-family: inherit;
+      }
+      .mock-entity .chevron {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 16px;
+        pointer-events: none;
+      }
+
+      /* Toggle */
+      .mock-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        padding: 10px 12px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .mock-toggle span { font-size: 14px; color: #1f2937; }
+
+      .toggle-pill {
+        width: 40px;
+        height: 22px;
+        border-radius: 11px;
+        background: #2563eb;
+        position: relative;
+        flex-shrink: 0;
+        transition: background .2s;
+      }
+      .toggle-pill.off { background: #d1d5db; }
+      .toggle-pill::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 21px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: white;
+        transition: left .2s;
+      }
+      .toggle-pill.off::after { left: 3px; }
+
+      /* Section headings */
+      .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1f2937;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .subsection-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+      }
+
+      .zone-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="topbar">
+      <div class="tabs">
+        <button class="tab active" data-tab="card">Card</button>
+        <button class="tab" data-tab="editor">Editor</button>
+      </div>
+      <div class="lang-selector">
+        <span>Language:</span>
+        <button class="lang-btn active" data-lang="es">ES</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <!-- ══ CARD TAB ══════════════════════════════════════════ -->
+    <div id="panel-card" class="panel active">
+      <div class="controls">
+        <button id="randomize">Randomize values</button>
+      </div>
+      <div class="previews">
+        <div class="frame large">
+          <div class="frame-label">Full size (100%)</div>
+          <toothbrush-state-card id="card-large"></toothbrush-state-card>
+        </div>
+        <div class="frame small">
+          <div class="frame-label">50% size</div>
+          <toothbrush-state-card id="card-small"></toothbrush-state-card>
+        </div>
+        <div class="frame xsmall">
+          <div class="frame-label">25% size</div>
+          <toothbrush-state-card id="card-xsmall"></toothbrush-state-card>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EDITOR TAB ════════════════════════════════════════ -->
+    <div id="panel-editor" class="panel">
+      <div class="editor-wrap">
+        <p class="editor-note">Editor configuration preview — visual mock only, to see texts, no real functionality.</p>
+        <div class="editor-form" id="editor-form"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import "./dist/toothbrush-state-card.js";
+
+      // ── Translations ──────────────────────────────────────
+      let currentLang = "es";
+      const transCache = {};
+
+      async function loadLang(lang) {
+        if (transCache[lang]) return transCache[lang];
+        if (!transCache["en"]) {
+          const r = await fetch("./dist/translations/en.json");
+          transCache["en"] = await r.json();
+        }
+        if (lang === "en") return transCache["en"];
+        try {
+          const r = await fetch(`./dist/translations/${lang}.json`);
+          transCache[lang] = r.ok
+            ? { ...transCache["en"], ...(await r.json()) }
+            : transCache["en"];
+        } catch { transCache[lang] = transCache["en"]; }
+        return transCache[lang];
+      }
+
+      function t(key) {
+        return (transCache[currentLang] ?? transCache["en"] ?? {})[key] ?? key;
+      }
+
+      // ── Entity ids ────────────────────────────────────────
+      const entityIds = {
+        score:          "sensor.last_brush_score",
+        last_brush_time:"sensor.last_brush_time",
+        upper_right_out:"sensor.diente_superior_exterior_derecha",
+        upper_right_in: "sensor.diente_superior_interior_derecha",
+        lower_right_out:"sensor.diente_inferior_exterior_derecha",
+        lower_right_in: "sensor.diente_inferior_interior_derecha",
+        upper_left_out: "sensor.diente_superior_exterior_izquierda",
+        upper_left_in:  "sensor.diente_superior_interior_izquierda",
+        lower_left_out: "sensor.diente_inferior_exterior_izquierda",
+        lower_left_in:  "sensor.diente_inferior_interior_izquierda"
+      };
+
+      // ── Cards ─────────────────────────────────────────────
+      await customElements.whenDefined("toothbrush-state-card");
+
+      const cardLarge  = document.getElementById("card-large");
+      const cardSmall  = document.getElementById("card-small");
+      const cardXSmall = document.getElementById("card-xsmall");
+
+      const cardConfig = { title: "Brushing state", show_values: true, ...entityIds };
+      [cardLarge, cardSmall, cardXSmall].forEach(c => c.setConfig(cardConfig));
+
+      function buildHass(values) {
+        const states = {};
+        for (const [key, id] of Object.entries(entityIds)) {
+          states[id] = { state: values[key] != null ? String(values[key]) : "0" };
+        }
+        return { states, locale: { language: currentLang } };
+      }
+
+      let currentValues = {
+        score: 58,
+        last_brush_time: new Date(Date.now() - 3 * 3_600_000).toISOString(),
+        upper_right_out: 0,  upper_right_in: 35,
+        lower_right_out: 78, lower_right_in: 92,
+        upper_left_out: 24,  upper_left_in: 56,
+        lower_left_out: 100, lower_left_in: 12
+      };
+
+      function updateCards() {
+        const hass = buildHass(currentValues);
+        [cardLarge, cardSmall, cardXSmall].forEach(c => c.hass = hass);
+      }
+
+      updateCards();
+
+      document.getElementById("randomize").addEventListener("click", () => {
+        const rand = () => Math.round(Math.random() * 100);
+        currentValues = {
+          score: rand(),
+          last_brush_time: new Date(Date.now() - Math.random() * 48 * 3_600_000).toISOString(),
+          upper_right_out: rand(), upper_right_in: rand(),
+          lower_right_out: rand(), lower_right_in: rand(),
+          upper_left_out:  rand(), upper_left_in:  rand(),
+          lower_left_out:  rand(), lower_left_in:  rand()
+        };
+        updateCards();
+      });
+
+      // ── Mock editor ───────────────────────────────────────
+      const upperZoneKeys = ["upper_right_out", "upper_right_in", "upper_left_in", "upper_left_out"];
+      const lowerZoneKeys = ["lower_right_out", "lower_right_in", "lower_left_in", "lower_left_out"];
+
+      function mockField(label, value = "") {
+        return `<div class="mock-field">
+          <label>${label}</label>
+          <input type="text" value="${value}" />
+        </div>`;
+      }
+
+      function mockEntity(label, value = "") {
+        return `<div class="mock-entity">
+          <label>${label}</label>
+          <input type="text" value="${value}" readonly />
+          <span class="chevron">▾</span>
+        </div>`;
+      }
+
+      function mockToggle(label, on = true) {
+        return `<div class="mock-toggle">
+          <span>${label}</span>
+          <div class="toggle-pill${on ? "" : " off"}"></div>
+        </div>`;
+      }
+
+      function renderEditor() {
+        const form = document.getElementById("editor-form");
+        form.innerHTML = `
+          ${mockField(t("editor_title"))}
+          ${mockToggle(t("editor_show_values"), true)}
+          ${mockEntity(t("editor_score"), entityIds.score)}
+          ${mockEntity(t("editor_last_brush_time"), entityIds.last_brush_time)}
+
+          <div class="section-title">${t("editor_zones")}</div>
+          <div class="subsection-title">${t("editor_upper_zones")}</div>
+          <div class="zone-grid">
+            ${upperZoneKeys.map(k => mockEntity(t(k), entityIds[k])).join("")}
+          </div>
+          <div class="subsection-title">${t("editor_lower_zones")}</div>
+          <div class="zone-grid">
+            ${lowerZoneKeys.map(k => mockEntity(t(k), entityIds[k])).join("")}
+          </div>
+        `;
+
+        form.querySelectorAll(".mock-toggle").forEach(el => {
+          el.addEventListener("click", () => {
+            el.querySelector(".toggle-pill").classList.toggle("off");
+          });
+        });
+      }
+
+      // ── Language switching ────────────────────────────────
+      async function switchLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll(".lang-btn").forEach(b =>
+          b.classList.toggle("active", b.dataset.lang === lang));
+        await loadLang(lang);
+        const newConfig = { title: "Brushing state", show_values: true, ...entityIds };
+        [cardLarge, cardSmall, cardXSmall].forEach(c => c.setConfig(newConfig));
+        updateCards();
+        renderEditor();
+      }
+
+      document.querySelectorAll(".lang-btn").forEach(b =>
+        b.addEventListener("click", () => switchLang(b.dataset.lang)));
+
+      // ── Tab switching ─────────────────────────────────────
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+          tab.classList.add("active");
+          document.getElementById(`panel-${tab.dataset.tab}`).classList.add("active");
+        });
+      });
+
+      // ── Init ──────────────────────────────────────────────
+      await loadLang(currentLang);
+      renderEditor();
+    </script>
+  </body>
+</html>

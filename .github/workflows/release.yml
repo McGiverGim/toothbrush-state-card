@@ -1,0 +1,40 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Extract version from tag
+        id: tag_name
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      - name: Extract release notes from changelog
+        run: |
+          VERSION="${{ steps.tag_name.outputs.VERSION }}"
+          awk -v version="$VERSION" '
+            index($0, "## [" version "]") == 1 { in_section = 1; next }
+            in_section && /^## \[/ { exit }
+            in_section { print }
+          ' CHANGELOG.md > release_notes.md
+
+          if [ ! -s release_notes.md ]; then
+            echo "No release notes found for $VERSION in CHANGELOG.md"
+            exit 1
+          fi
+
+          cat release_notes.md
+      - name: Release
+        uses: softprops/action-gh-release@v2.6.1
+        with:
+          draft: true
+          body_path: release_notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

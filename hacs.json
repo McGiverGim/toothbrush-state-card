@@ -1,0 +1,7 @@
+{
+  "name": "Toothbrush State Card",
+  "content_in_root": false,
+  "filename": "toothbrush-state-card.js",
+  "homeassistant": "2023.1.0",
+  "render_readme": true
+}

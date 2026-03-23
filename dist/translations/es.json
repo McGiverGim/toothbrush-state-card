@@ -1,0 +1,19 @@
+{
+  "title": "Estado de cepillado",
+  "aria_label": "Mapa de zonas de dientes",
+  "editor_title": "Título",
+  "editor_show_values": "Mostrar valores de zona",
+  "editor_score": "Entidad de puntuación general",
+  "editor_zones": "Entidades de zona",
+  "editor_upper_zones": "Zonas superiores",
+  "editor_lower_zones": "Zonas inferiores",
+  "editor_last_brush_time": "Entidad de último cepillado",
+  "upper_right_out": "Superior exterior derecha",
+  "upper_right_in": "Superior interior derecha",
+  "upper_left_in": "Superior interior izquierda",
+  "upper_left_out": "Superior exterior izquierda",
+  "lower_right_out": "Inferior exterior derecha",
+  "lower_right_in": "Inferior interior derecha",
+  "lower_left_in": "Inferior interior izquierda",
+  "lower_left_out": "Inferior exterior izquierda"
+}

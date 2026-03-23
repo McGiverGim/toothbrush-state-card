@@ -1,0 +1,19 @@
+{
+  "title": "Brushing state",
+  "aria_label": "Teeth zone map",
+  "editor_title": "Title",
+  "editor_show_values": "Show zone values",
+  "editor_score": "Overall score entity",
+  "editor_zones": "Zone entities",
+  "editor_upper_zones": "Upper zones",
+  "editor_lower_zones": "Lower zones",
+  "editor_last_brush_time": "Last brushing entity",
+  "upper_right_out": "Upper right outer",
+  "upper_right_in": "Upper right inner",
+  "upper_left_in": "Upper left inner",
+  "upper_left_out": "Upper left outer",
+  "lower_right_out": "Lower right outer",
+  "lower_right_in": "Lower right inner",
+  "lower_left_in": "Lower left inner",
+  "lower_left_out": "Lower left outer"
+}
